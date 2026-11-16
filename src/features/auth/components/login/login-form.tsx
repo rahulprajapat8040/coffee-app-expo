@@ -38,7 +38,7 @@ export const LoginForm = () => {
           data.data.accessToken,
           data.data.refreshToken,
         );
-        router.push("/");
+        router.push("/home");
       },
       onError(err) {
         console.log(err.message || "Error in login");

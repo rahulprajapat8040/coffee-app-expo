@@ -400,25 +400,28 @@ export const packIcon = ({ size = 24, color = "currentColor" }: IconProps) => {
   );
 };
 
-export const EditPencil = () => {
+export const EditPencil = ({
+  size = 24,
+  color = "currentColor",
+}: IconProps) => {
   return (
-    <Svg width={14} height={14} viewBox="0 0 14 14" fill="none">
+    <Svg width={size} height={size} viewBox="0 0 14 14" fill="none">
       <Path
         d="M6.704 1.627H4.523c-1.794 0-2.919 1.27-2.919 3.068v4.85c0 1.797 1.12 3.067 2.919 3.067H9.67c1.8 0 2.92-1.27 2.92-3.067v-2.35"
-        stroke="#313131"
+        stroke={color}
         strokeLinecap="round"
         strokeLinejoin="round"
       />
       <Path
         clipRule="evenodd"
         d="M5.15 6.37l4.359-4.359a1.391 1.391 0 011.966 0l.71.71a1.39 1.39 0 010 1.967l-4.38 4.38c-.237.237-.56.37-.895.37H4.724l.055-2.204c.008-.324.14-.634.37-.863z"
-        stroke="#313131"
+        stroke={color}
         strokeLinecap="round"
         strokeLinejoin="round"
       />
       <Path
         d="M8.846 2.685l2.664 2.663"
-        stroke="#313131"
+        stroke={color}
         strokeLinecap="round"
         strokeLinejoin="round"
       />
@@ -655,6 +658,42 @@ export const SliderHorizontal = ({
       strokeLinejoin="round"
     >
       <Path d="M10 5H3M12 19H3M14 3v4M16 17v4M21 12h-9M21 19h-5M21 5h-7M8 10v4M8 12H3" />
+    </Svg>
+  );
+};
+
+export const Home = ({ size = 24, color = "currentColor" }: IconProps) => {
+  return (
+    <Svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke={color}
+      strokeWidth={2}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <Path d="M15 21v-8a1 1 0 00-1-1h-4a1 1 0 00-1 1v8" />
+      <Path d="M3 10a2 2 0 01.709-1.528l7-6a2 2 0 012.582 0l7 6A2 2 0 0121 10v9a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
+    </Svg>
+  );
+};
+
+export const MapPin = ({ size = 24, color = "currentColor" }: IconProps) => {
+  return (
+    <Svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke={color}
+      strokeWidth={2}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <Path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 01-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0116 0" />
+      <Circle cx={12} cy={10} r={3} />
     </Svg>
   );
 };

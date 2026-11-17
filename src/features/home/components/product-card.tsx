@@ -2,6 +2,7 @@ import { Plus } from "@/components/common/icons/svg";
 import { AppImage } from "@/components/common/media/app-image";
 import { AppText } from "@/components/common/text/app-text";
 import { COLORS } from "@/lib/constants/color.constant";
+import { FONT_SIZES, FONTS } from "@/lib/constants/font.constant";
 import { ICoffee } from "@/lib/interfaces/coffes.interface";
 import { Pressable, StyleSheet, View } from "react-native";
 
@@ -19,8 +20,17 @@ export const ProductCard = ({
     <Pressable onPress={onPress} style={styles.card}>
       <AppImage style={styles.productImage} src={image} />
       <View style={{ marginTop: 6 }}>
-        <AppText style={{ fontSize: 18, fontWeight: "bold" }}>{name}</AppText>
-        <AppText style={{ color: COLORS.GREY.LIGHT }}>{category.name}</AppText>
+        <AppText
+          size={FONT_SIZES.base}
+          weight={FONTS.semibold}
+          numberOfLines={1}
+          ellipsizeMode="tail"
+        >
+          {name}
+        </AppText>
+        <AppText color={COLORS.GREY.LIGHT} size={FONT_SIZES.md}>
+          {category.name}
+        </AppText>
         <View
           style={{
             marginTop: 4,

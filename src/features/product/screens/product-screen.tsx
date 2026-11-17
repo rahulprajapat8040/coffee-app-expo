@@ -1,9 +1,9 @@
 import {
-    MatchaIcon,
-    OrderPlaceIcon,
-    packIcon,
-    Star,
-    TabIcons,
+  MatchaIcon,
+  OrderPlaceIcon,
+  packIcon,
+  Star,
+  TabIcons,
 } from "@/components/common/icons/svg";
 // import { ScreenHeader } from '@/components/common/navigation/screen-header';
 import { AppImage } from "@/components/common/media/app-image";
@@ -15,18 +15,19 @@ import { QUERY_CONSTANT } from "@/lib/constants/query.constant";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import {
-    Pressable,
-    ScrollView,
-    StatusBar,
-    StyleSheet,
-    useWindowDimensions,
-    View,
+  Pressable,
+  ScrollView,
+  StatusBar,
+  StyleSheet,
+  useWindowDimensions,
+  View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 // import { OrderButton } from "../components/order-button";
 import { ScreenHeader } from "@/components/common/navigation/screen-header";
 import { productApi } from "@/services/product.service";
-import { useLocalSearchParams, useRouter } from "expo-router";
+import { useLocalSearchParams } from "expo-router";
+import { OrderButton } from "../components/order-button";
 
 const detailIcons = [
   {
@@ -45,7 +46,6 @@ const detailIcons = [
 
 export const CoffeeDetailScreen = () => {
   const { id: coffeeId } = useLocalSearchParams<{ id: string }>();
-  const router = useRouter();
 
   const { width } = useWindowDimensions();
   const buttonWidth = (width - 40 - 24) / 3;
@@ -153,11 +153,7 @@ export const CoffeeDetailScreen = () => {
             $ {selectedSize.price}
           </AppText>
         </View>
-        {/* <OrderButton
-          navigation={navigation}
-          coffeeId={coffeeId}
-          variantId={selectedSize.id}
-        /> */}
+        <OrderButton coffeeId={coffeeId} variantId={selectedSize.id} />
       </View>
     </SafeAreaView>
   );

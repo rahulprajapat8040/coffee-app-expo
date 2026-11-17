@@ -2,6 +2,7 @@ import { IApiResponse } from "@/api/axios/base-res.interface";
 import { request } from "@/api/axios/request";
 import { API_ENDPOINT } from "@/lib/constants/routes.constant";
 import { GetFilterUrl } from "@/lib/helper/function.helper";
+import { IAddressRes } from "@/lib/interfaces/address/address-res.interface";
 import { ICoffessRes } from "@/lib/interfaces/coffes.interface";
 import { ICategoryRes } from "@/lib/interfaces/home/categories.interface";
 
@@ -17,6 +18,14 @@ export const homeApi = {
     const query = GetFilterUrl(qeuryData);
     return request<IApiResponse<ICoffessRes>>({
       url: `${API_ENDPOINT.PRODUCT}/coffee?${query ? query : ""}`,
+      method: "GET",
+    });
+  },
+
+  getAddress(qeuryData: { page: number }) {
+    const query = GetFilterUrl(qeuryData);
+    return request<IApiResponse<IAddressRes>>({
+      url: `${API_ENDPOINT.USER}/address?${query ? query : ""}`,
       method: "GET",
     });
   },

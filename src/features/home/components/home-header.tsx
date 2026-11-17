@@ -1,17 +1,19 @@
 import {
-    Bell,
-    ChevronDown,
-    SearchIcon,
-    SliderHorizontal,
+  Bell,
+  ChevronDown,
+  SearchIcon,
+  SliderHorizontal,
 } from "@/components/common/icons/svg";
 import { AppText } from "@/components/common/text/app-text";
 import Button from "@/components/ui/button";
 import { AppTextInput } from "@/components/ui/input";
 import { COLORS } from "@/lib/constants/color.constant";
 import { FONT_SIZES, FONTS } from "@/lib/constants/font.constant";
+import { useRouter } from "expo-router";
 import { Pressable, StyleSheet, View } from "react-native";
 
 export const HomeHeader = () => {
+  const router = useRouter();
   return (
     <View style={styles.container}>
       <View style={styles.topHeader}>
@@ -23,7 +25,10 @@ export const HomeHeader = () => {
           >
             LOCATION
           </AppText>
-          <Pressable style={styles.location}>
+          <Pressable
+            onPress={() => router.push("/address")}
+            style={styles.location}
+          >
             <AppText
               size={FONT_SIZES.sm}
               weight={FONTS.medium}

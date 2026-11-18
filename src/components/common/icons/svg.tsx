@@ -697,3 +697,38 @@ export const MapPin = ({ size = 24, color = "currentColor" }: IconProps) => {
     </Svg>
   );
 };
+
+export const CricleX = ({ size = 24, color = "currentColor" }: IconProps) => {
+  return (
+    <Svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke={color}
+      strokeWidth={2}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <Circle cx={12} cy={12} r={10} />
+      <Path d="M15 9l-6 6M9 9l6 6" />
+    </Svg>
+  );
+};
+
+export const BookMark = ({ size = 24, color }: IconProps) => {
+  return (
+    <Svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke={color}
+      strokeWidth={2}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <Path d="M17 3a2 2 0 012 2v15a1 1 0 01-1.496.868l-4.512-2.578a2 2 0 00-1.984 0l-4.512 2.578A1 1 0 015 20V5a2 2 0 012-2z" />
+    </Svg>
+  );
+};

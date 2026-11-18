@@ -7,7 +7,8 @@ import { useInfiniteQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
 import { ActivityIndicator, FlatList, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { AddressCard } from "../components/address/address-card";
+import { AddAddressButton } from "../components/add-address-button";
+import { AddressCard } from "../components/address-card";
 
 export const AddressScreen = () => {
   const insets = useSafeAreaInsets();
@@ -35,10 +36,19 @@ export const AddressScreen = () => {
     <View style={{ flex: 1 }}>
       <ScreenHeader title="Address" />
 
-      <View style={{ flex: 1, paddingHorizontal: 18 }}>
-        <AppText weight={FONTS.semibold} size={FONT_SIZES.lg}>
-          Saved Addresses
-        </AppText>
+      <View style={{ flex: 1, paddingHorizontal: 18, gap: 12 }}>
+        <View
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+            justifyContent: "space-between",
+          }}
+        >
+          <AppText weight={FONTS.semibold} size={FONT_SIZES.lg}>
+            Saved Addresses
+          </AppText>
+          <AddAddressButton />
+        </View>
 
         <View style={{ flex: 1, marginTop: 8 }}>
           <FlatList

@@ -1,4 +1,4 @@
-import { AddressScreen } from "@/features/home/screens/address-screen";
+import { AddressScreen } from "@/features/address/screens/address-screen";
 
 const Address = () => {
   return <AddressScreen />;

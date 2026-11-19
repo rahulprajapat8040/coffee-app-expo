@@ -1,31 +1,15 @@
-import { Star } from "@/components/common/icons/svg";
 import { AppText } from "@/components/common/text/app-text";
 import { COLORS } from "@/lib/constants/color.constant";
 import { FONT_SIZES, FONTS } from "@/lib/constants/font.constant";
 import { IAddress } from "@/lib/interfaces/address/address-res.interface";
 import { StyleSheet, View } from "react-native";
 import { EditAddressButton } from "./edit-address-button";
+import { SetDefaultAddress } from "./set-default-address-btn";
 
 export const AddressCard = ({ address }: { address: IAddress }) => {
   return (
     <View style={styles.container}>
-      <View
-        style={[
-          styles.defaultAddress,
-          address.isDefault
-            ? {
-                backgroundColor: COLORS.BRWON.NORMAL,
-              }
-            : {
-                borderWidth: 1,
-              },
-        ]}
-      >
-        <Star
-          size={18}
-          color={address.isDefault ? COLORS.SURFACE.WHITE : COLORS.GREY.NORMAL}
-        />
-      </View>
+      <SetDefaultAddress id={address.id} isDefault={address.isDefault} />
       <View style={{ flex: 1 }}>
         <AppText size={FONT_SIZES.lg} weight={FONTS.semibold}>
           {address.nickName || "Address"}
@@ -50,13 +34,5 @@ const styles = StyleSheet.create({
     gap: 12,
     borderRadius: 12,
     height: 130,
-  },
-
-  defaultAddress: {
-    width: 28,
-    height: 28,
-    justifyContent: "center",
-    alignItems: "center",
-    borderRadius: 50,
   },
 });

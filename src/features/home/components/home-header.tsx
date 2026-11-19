@@ -1,54 +1,12 @@
-import {
-  Bell,
-  ChevronDown,
-  SearchIcon,
-  SliderHorizontal,
-} from "@/components/common/icons/svg";
-import { AppText } from "@/components/common/text/app-text";
+import { Bell, SearchIcon } from "@/components/common/icons/svg";
 import Button from "@/components/ui/button";
 import { AppTextInput } from "@/components/ui/input";
 import { COLORS } from "@/lib/constants/color.constant";
-import { FONT_SIZES, FONTS } from "@/lib/constants/font.constant";
-import { useRouter } from "expo-router";
-import { Pressable, StyleSheet, View } from "react-native";
+import { StyleSheet, View } from "react-native";
 
 export const HomeHeader = () => {
-  const router = useRouter();
   return (
     <View style={styles.container}>
-      <View style={styles.topHeader}>
-        <View>
-          <AppText
-            size={FONT_SIZES.sm}
-            weight={FONTS.medium}
-            color={COLORS.BRWON.LIGHT_ACTIVE}
-          >
-            LOCATION
-          </AppText>
-          <Pressable
-            onPress={() => router.push("/address")}
-            style={styles.location}
-          >
-            <AppText
-              size={FONT_SIZES.sm}
-              weight={FONTS.medium}
-              color={COLORS.SURFACE.WHITE}
-            >
-              Bizen, Thailand
-            </AppText>
-            <ChevronDown size={18} color={COLORS.SURFACE.WHITE} />
-          </Pressable>
-        </View>
-        <View>
-          <Button
-            size="small"
-            style={{ width: 38, height: 38, borderRadius: 50 }}
-            variant="ghost"
-          >
-            <Bell size={18} color={COLORS.SURFACE.WHITE} />
-          </Button>
-        </View>
-      </View>
       <View style={[styles.topHeader, { marginTop: 12 }]}>
         <View style={{ flex: 1, minWidth: 0 }}>
           <View style={styles.icon}>
@@ -60,9 +18,12 @@ export const HomeHeader = () => {
             style={styles.searchInput}
           />
         </View>
-
-        <Button size="small" style={{ width: 38, height: 38 }} variant="ghost">
-          <SliderHorizontal size={22} color={COLORS.SURFACE.WHITE} />
+        <Button
+          size="small"
+          style={{ width: 38, height: 38, borderRadius: 50 }}
+          variant="ghost"
+        >
+          <Bell size={18} color={COLORS.SURFACE.WHITE} />
         </Button>
       </View>
     </View>
@@ -87,7 +48,7 @@ const styles = StyleSheet.create({
   topHeader: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-between",
+    justifyContent: "flex-end",
     gap: 12,
   },
   icon: {

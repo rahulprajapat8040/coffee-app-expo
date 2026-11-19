@@ -47,4 +47,11 @@ export const homeApi = {
       data,
     });
   },
+
+  setAddressDefault(id: string) {
+    return request({
+      url: `${API_ENDPOINT.USER}/address/${id}`,
+      method: "PATCH",
+    });
+  },
 };

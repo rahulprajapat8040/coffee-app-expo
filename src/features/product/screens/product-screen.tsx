@@ -3,18 +3,21 @@ import {
   OrderPlaceIcon,
   packIcon,
   Star,
-  TabIcons,
 } from "@/components/common/icons/svg";
-// import { ScreenHeader } from '@/components/common/navigation/screen-header';
 import { AppImage } from "@/components/common/media/app-image";
 import { AppText } from "@/components/common/text/app-text";
 import { ReadMoreText } from "@/components/common/text/read-more-text";
 import { COLORS } from "@/lib/constants/color.constant";
 import { FONTS } from "@/lib/constants/font.constant";
 import { QUERY_CONSTANT } from "@/lib/constants/query.constant";
-import { useSuspenseQuery } from "@tanstack/react-query";
+import {
+  useQueryClient,
+  useQuery,
+  useSuspenseQuery,
+} from "@tanstack/react-query";
 import { useState } from "react";
 import {
+  Alert,
   Pressable,
   ScrollView,
   StatusBar,
@@ -28,6 +31,9 @@ import { ScreenHeader } from "@/components/common/navigation/screen-header";
 import { productApi } from "@/services/product.service";
 import { useLocalSearchParams } from "expo-router";
 import { OrderButton } from "../components/order-button";
+import { orderApi } from "@/services/order.service";
+import { useApiMutation } from "@/hooks/use-api-mutation";
+import { Ionicons } from "@expo/vector-icons";
 
 const detailIcons = [
   {
@@ -57,12 +63,42 @@ export const CoffeeDetailScreen = () => {
     queryKey: [QUERY_CONSTANT.COFFEE, QUERY_CONSTANT.DETAIL, coffeeId],
   });
 
-  const [selectedSize, setSelectedSize] = useState(data.variants[0]);
+  const [selectedSize, setSelectedSize] = useState(
+    data.variants.find((variant) => variant.status === "AVAILABLE") ??
+      data.variants[0],
+  );
+  const queryClient = useQueryClient();
+  const wishlistQuery = useQuery({
+    queryKey: ["wishlist"],
+    queryFn: orderApi.getWishlist,
+  });
+  const isSaved =
+    wishlistQuery.data?.data.some((item) => item.coffeeId === coffeeId) ??
+    false;
+  const wishlistMutation = useApiMutation(
+    isSaved ? orderApi.removeFromWishlist : orderApi.addToWishlist,
+    {
+      onSuccess: () =>
+        queryClient.invalidateQueries({ queryKey: ["wishlist"] }),
+      onError: (error) =>
+        Alert.alert("Couldn't update wishlist", error.message),
+    },
+  );
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: COLORS.SURFACE.LIGHT }}>
       <StatusBar barStyle="dark-content" />
-      <ScreenHeader title="Detail" rightIcon={<TabIcons.Heart />} />
+      <ScreenHeader
+        title="Detail"
+        rightIcon={
+          <Ionicons
+            name={isSaved ? "heart" : "heart-outline"}
+            size={22}
+            color={isSaved ? COLORS.BRWON.DARK : COLORS.GREY.NORMAL}
+          />
+        }
+        onIconPress={() => wishlistMutation.mutate(coffeeId)}
+      />
       <ScrollView
         contentContainerStyle={{ paddingBottom: 90 }}
         showsVerticalScrollIndicator={false}
@@ -110,33 +146,50 @@ export const CoffeeDetailScreen = () => {
               Size
             </AppText>
             <View style={styles.sizesContainer}>
-              <ScrollView
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                contentContainerStyle={styles.sizesRow}
-              >
-                {data.variants.map((item) => {
-                  const isActive = item === selectedSize;
-                  return (
-                    <Pressable
-                      key={item.id}
-                      style={[
-                        styles.sizeButton,
-                        isActive && styles.activeSizeButton,
-                        { width: buttonWidth },
-                      ]}
-                      onPress={() => setSelectedSize(item)}
-                    >
-                      <AppText
-                        weight={FONTS.semibold}
-                        style={[isActive && { color: COLORS.BRWON.NORMAL }]}
+              {data.variants.length ? (
+                <ScrollView
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                  contentContainerStyle={styles.sizesRow}
+                >
+                  {data.variants.map((item) => {
+                    const isActive = item.id === selectedSize?.id;
+                    return (
+                      <Pressable
+                        key={item.id}
+                        style={[
+                          styles.sizeButton,
+                          isActive && styles.activeSizeButton,
+                          { width: buttonWidth },
+                        ]}
+                        onPress={() => setSelectedSize(item)}
+                        disabled={item.status !== "AVAILABLE"}
                       >
-                        {item.size}
-                      </AppText>
-                    </Pressable>
-                  );
-                })}
-              </ScrollView>
+                        <AppText
+                          weight={FONTS.semibold}
+                          style={[
+                            isActive && { color: COLORS.BRWON.NORMAL },
+                            item.status !== "AVAILABLE" && {
+                              color: COLORS.GREY.LIGHT,
+                            },
+                          ]}
+                        >
+                          {item.size}
+                        </AppText>
+                        {item.status !== "AVAILABLE" && (
+                          <AppText size={9} color={COLORS.GREY.LIGHT_HOVER}>
+                            Unavailable
+                          </AppText>
+                        )}
+                      </Pressable>
+                    );
+                  })}
+                </ScrollView>
+              ) : (
+                <AppText color={COLORS.GREY.LIGHT_HOVER}>
+                  No sizes are available right now.
+                </AppText>
+              )}
             </View>
           </View>
         </View>
@@ -150,10 +203,16 @@ export const CoffeeDetailScreen = () => {
             weight={FONTS.bold}
             style={{ fontSize: 18, color: COLORS.BRWON.NORMAL }}
           >
-            $ {selectedSize.price}
+            {selectedSize ? `$ ${selectedSize.price}` : "Unavailable"}
           </AppText>
         </View>
-        <OrderButton coffeeId={coffeeId} variantId={selectedSize.id} />
+        {selectedSize && (
+          <OrderButton
+            coffeeId={coffeeId}
+            variantId={selectedSize.id}
+            disabled={selectedSize.status !== "AVAILABLE"}
+          />
+        )}
       </View>
     </SafeAreaView>
   );

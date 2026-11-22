@@ -2,9 +2,12 @@ import { Bell, SearchIcon } from "@/components/common/icons/svg";
 import Button from "@/components/ui/button";
 import { AppTextInput } from "@/components/ui/input";
 import { COLORS } from "@/lib/constants/color.constant";
+import { useRouter } from "expo-router";
+import { Ionicons } from "@expo/vector-icons";
 import { StyleSheet, View } from "react-native";
 
 export const HomeHeader = () => {
+  const router = useRouter();
   return (
     <View style={styles.container}>
       <View style={[styles.topHeader, { marginTop: 12 }]}>
@@ -24,6 +27,18 @@ export const HomeHeader = () => {
           variant="ghost"
         >
           <Bell size={18} color={COLORS.SURFACE.WHITE} />
+        </Button>
+        <Button
+          size="small"
+          style={{ width: 38, height: 38, borderRadius: 50 }}
+          variant="ghost"
+          onPress={() => router.push("/cart")}
+        >
+          <Ionicons
+            name="bag-handle-outline"
+            size={18}
+            color={COLORS.SURFACE.WHITE}
+          />
         </Button>
       </View>
     </View>

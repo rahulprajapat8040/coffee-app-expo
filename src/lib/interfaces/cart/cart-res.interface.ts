@@ -6,5 +6,17 @@ export interface ICartRes {
   userId: string;
   createdAt: string;
   updatedAt: string;
-  deletedAt: any;
+  coffee: {
+    id: string;
+    name: string;
+    image: string | null;
+    isActive: boolean;
+  };
+  variant: {
+    id: string;
+    size: string;
+    price: string;
+    status: "AVAILABLE" | "UN_AVAILABLE";
+    coffeeId: string;
+  };
 }

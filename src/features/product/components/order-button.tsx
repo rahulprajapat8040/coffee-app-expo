@@ -6,19 +6,31 @@ import { IAddToCart } from "@/lib/interfaces/order/order-form.interface";
 import { orderApi } from "@/services/order.service";
 import { useRouter } from "expo-router";
 import { Pressable, StyleSheet } from "react-native";
+import { useQueryClient } from "@tanstack/react-query";
+import { Alert } from "react-native";
 
 interface Props {
   coffeeId: string;
   variantId: string;
   quantity?: number;
+  disabled?: boolean;
 }
 
-export const OrderButton = ({ coffeeId, variantId, quantity = 1 }: Props) => {
+export const OrderButton = ({
+  coffeeId,
+  variantId,
+  quantity = 1,
+  disabled = false,
+}: Props) => {
   const router = useRouter();
-  const { mutate } = useApiMutation(orderApi.addToCart, {
+  const queryClient = useQueryClient();
+  const { mutate, isPending } = useApiMutation(orderApi.addToCart, {
     onSuccess() {
-      router.push("/checkout");
+      queryClient.invalidateQueries({ queryKey: ["cart"] });
+      router.push("/cart");
     },
+    onError: (error) =>
+      Alert.alert("Couldn't add coffee to cart", error.message),
   });
 
   const handleAddToCheckout = (data: IAddToCart) => {
@@ -28,6 +40,7 @@ export const OrderButton = ({ coffeeId, variantId, quantity = 1 }: Props) => {
   return (
     <Pressable
       style={styles.orderButton}
+      disabled={disabled || isPending}
       onPress={() => handleAddToCheckout({ coffeeId, variantId, quantity })}
     >
       <AppText
@@ -37,7 +50,7 @@ export const OrderButton = ({ coffeeId, variantId, quantity = 1 }: Props) => {
           fontSize: 16,
         }}
       >
-        Order
+        {isPending ? "Adding..." : "Add to cart"}
       </AppText>
     </Pressable>
   );
@@ -46,7 +59,8 @@ export const OrderButton = ({ coffeeId, variantId, quantity = 1 }: Props) => {
 const styles = StyleSheet.create({
   orderButton: {
     backgroundColor: COLORS.BRWON.NORMAL,
-    width: 240,
+    minWidth: 180,
+    paddingHorizontal: 20,
     height: 52,
     justifyContent: "center",
     alignItems: "center",

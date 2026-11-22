@@ -3,6 +3,7 @@ import { request } from "@/api/axios/request";
 import { API_ENDPOINT } from "@/lib/constants/routes.constant";
 import { ICartRes } from "@/lib/interfaces/cart/cart-res.interface";
 import { IAddToCart } from "@/lib/interfaces/order/order-form.interface";
+import { IOrderRes } from "@/lib/interfaces/order/order-res.interface";
 
 export const orderApi = {
   async addToCart(data: IAddToCart) {
@@ -17,23 +18,76 @@ export const orderApi = {
   },
 
   updateQuantity(data: {
-    productId: string;
+    cartItemId: string;
     quantity: number;
-    type: "increase" | "decrease";
+    type: "asc" | "desc";
   }) {
-    const { productId, quantity } = data;
+    const { cartItemId, quantity, type } = data;
     return request({
-      url: `/cart/items/${productId}`,
-      data: { quantity },
+      url: `${API_ENDPOINT.CART}/${cartItemId}/quantity`,
+      data: { quantity, type },
       method: "PATCH",
     });
   },
 
-  removeFromCart(productId: string) {
-    return request({ url: `/cart/items/${productId}`, method: "DELETE" });
+  removeFromCart(cartItemId: string) {
+    return request({
+      url: `${API_ENDPOINT.CART}/${cartItemId}`,
+      method: "DELETE",
+    });
   },
 
-  clearCart() {
-    return request({ url: "/cart", method: "DELETE" });
+  createOrder(data: { addressId: string; note?: string }) {
+    return request<IApiResponse<IOrderRes>>({
+      url: API_ENDPOINT.ORDERS,
+      method: "POST",
+      data,
+    });
+  },
+
+  getMyOrders() {
+    return request<IApiResponse<IOrderRes[]>>({
+      url: `${API_ENDPOINT.ORDERS}/my`,
+      method: "GET",
+    });
+  },
+
+  getWishlist() {
+    return request<IApiResponse<IWishlistItem[]>>({
+      url: API_ENDPOINT.WISHLIST,
+      method: "GET",
+    });
+  },
+
+  addToWishlist(coffeeId: string) {
+    return request<IApiResponse<{ id: string; coffeeId: string }>>({
+      url: `${API_ENDPOINT.WISHLIST}/${coffeeId}`,
+      method: "POST",
+    });
+  },
+
+  removeFromWishlist(coffeeId: string) {
+    return request({
+      url: `${API_ENDPOINT.WISHLIST}/${coffeeId}`,
+      method: "DELETE",
+    });
   },
 };
+
+export interface IWishlistItem {
+  id: string;
+  coffeeId: string;
+  coffee: {
+    id: string;
+    name: string;
+    description: string;
+    image: string | null;
+    isActive: boolean;
+    variants: {
+      id: string;
+      size: string;
+      price: string;
+      status: "AVAILABLE" | "UN_AVAILABLE";
+    }[];
+  };
+}

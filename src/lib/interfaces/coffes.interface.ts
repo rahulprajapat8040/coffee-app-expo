@@ -1,5 +1,4 @@
-import { IPageInfo } from "@/api/axios/base-res.interface"
-
+import { IPageInfo } from "@/api/axios/base-res.interface";
 
 export interface ICoffessRes {
   data: ICoffee[];
@@ -16,9 +15,16 @@ export interface ICoffee {
   updatedAt: string;
   deletedAt: any;
   category: Category;
+  variants: ICoffeeVariant[];
 }
 
+export interface ICoffeeVariant {
+  id: string;
+  size: string;
+  price: string;
+  status: "AVAILABLE" | "UN_AVAILABLE";
+}
 
 export interface Category {
-  name: string
+  name: string;
 }

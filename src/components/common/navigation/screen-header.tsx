@@ -1,7 +1,7 @@
 import { COLORS } from "@/lib/constants/color.constant";
 import { FONTS } from "@/lib/constants/font.constant";
 import { useRouter } from "expo-router";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { Pressable, StyleSheet, View } from "react-native";
 import { ChevronLeft } from "../icons/svg";
 import { AppText } from "../text/app-text";
 
@@ -20,7 +20,18 @@ export const ScreenHeader = ({ title, rightIcon, onIconPress }: Props) => {
         </AppText>
       </Pressable>
       <AppText weight={FONTS.semibold}>{title}</AppText>
-      <Text>{rightIcon}</Text>
+      {rightIcon ? (
+        <Pressable
+          accessibilityRole="button"
+          disabled={!onIconPress}
+          onPress={onIconPress}
+          hitSlop={8}
+        >
+          {rightIcon}
+        </Pressable>
+      ) : (
+        <View style={{ width: 20 }} />
+      )}
     </View>
   );
 };

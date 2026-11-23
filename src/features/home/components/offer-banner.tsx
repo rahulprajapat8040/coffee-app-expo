@@ -45,10 +45,10 @@ export const OfferBanner = ({ offers }: { offers: IOffer[] }) => {
 const styles = StyleSheet.create({
   list: {
     gap: 12,
-    paddingVertical: 18,
+    paddingTop: 18,
   },
   container: {
-    width: 310,
+    width: "100%",
     minHeight: 140,
     backgroundColor: COLORS.GREY.DARK,
     borderRadius: 18,

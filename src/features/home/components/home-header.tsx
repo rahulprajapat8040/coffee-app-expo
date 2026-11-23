@@ -2,8 +2,8 @@ import { Bell, SearchIcon } from "@/components/common/icons/svg";
 import Button from "@/components/ui/button";
 import { AppTextInput } from "@/components/ui/input";
 import { COLORS } from "@/lib/constants/color.constant";
-import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
 import { StyleSheet, View } from "react-native";
 
 export const HomeHeader = () => {
@@ -23,14 +23,14 @@ export const HomeHeader = () => {
         </View>
         <Button
           size="small"
-          style={{ width: 38, height: 38, borderRadius: 50 }}
+          style={{ width: 48, height: 48, borderRadius: 50 }}
           variant="ghost"
         >
           <Bell size={18} color={COLORS.SURFACE.WHITE} />
         </Button>
         <Button
           size="small"
-          style={{ width: 38, height: 38, borderRadius: 50 }}
+          style={{ width: 48, height: 48, borderRadius: 50 }}
           variant="ghost"
           onPress={() => router.push("/cart")}
         >
@@ -49,7 +49,7 @@ const styles = StyleSheet.create({
   container: {
     paddingHorizontal: 24,
     paddingTop: 38,
-    paddingBottom: 22,
+    paddingBottom: 32,
     backgroundColor: COLORS.GREY.DARK,
     borderBottomStartRadius: 38,
     borderBottomEndRadius: 38,

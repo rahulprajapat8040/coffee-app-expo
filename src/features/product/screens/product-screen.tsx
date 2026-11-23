@@ -34,6 +34,8 @@ import { OrderButton } from "../components/order-button";
 import { orderApi } from "@/services/order.service";
 import { useApiMutation } from "@/hooks/use-api-mutation";
 import { Ionicons } from "@expo/vector-icons";
+import { getBestOfferForProduct, getOfferDiscountCents } from "@/lib/helper/offer.helper";
+import { homeApi } from "@/services/home.service";
 
 const detailIcons = [
   {
@@ -72,6 +74,22 @@ export const CoffeeDetailScreen = () => {
     queryKey: ["wishlist"],
     queryFn: orderApi.getWishlist,
   });
+  const homeQuery = useQuery({
+    queryKey: ["home"],
+    queryFn: homeApi.getHome,
+  });
+  const offer = getBestOfferForProduct(
+    data.id,
+    data.categoryId,
+    homeQuery.data?.data.offers ?? [],
+  );
+  const originalPriceCents = selectedSize
+    ? Math.round(Number(selectedSize.price) * 100)
+    : 0;
+  const discountCents = getOfferDiscountCents(
+    originalPriceCents,
+    offer?.discountPercentage,
+  );
   const isSaved =
     wishlistQuery.data?.data.some((item) => item.coffeeId === coffeeId) ??
     false;
@@ -199,12 +217,36 @@ export const CoffeeDetailScreen = () => {
           <AppText style={{ color: COLORS.GREY.LIGHT_HOVER, fontSize: 14 }}>
             Price
           </AppText>
-          <AppText
-            weight={FONTS.bold}
-            style={{ fontSize: 18, color: COLORS.BRWON.NORMAL }}
-          >
-            {selectedSize ? `$ ${selectedSize.price}` : "Unavailable"}
-          </AppText>
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 7 }}>
+            <AppText
+              weight={FONTS.bold}
+              style={{ fontSize: 18, color: COLORS.BRWON.NORMAL }}
+            >
+              {selectedSize
+                ? `$ ${((originalPriceCents - discountCents) / 100).toFixed(2)}`
+                : "Unavailable"}
+            </AppText>
+            {discountCents > 0 && selectedSize ? (
+              <AppText
+                style={{
+                  fontSize: 12,
+                  color: COLORS.GREY.LIGHT_HOVER,
+                  textDecorationLine: "line-through",
+                }}
+              >
+                {`$ ${Number(selectedSize.price).toFixed(2)}`}
+              </AppText>
+            ) : null}
+          </View>
+          {offer && discountCents > 0 ? (
+            <AppText
+              size={11}
+              weight={FONTS.semibold}
+              color={COLORS.BRWON.DARK}
+            >
+              {Number(offer.discountPercentage)}% offer applied
+            </AppText>
+          ) : null}
         </View>
         {selectedSize && (
           <OrderButton

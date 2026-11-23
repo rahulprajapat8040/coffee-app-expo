@@ -1,8 +1,6 @@
 import { AppText } from "@/components/common/text/app-text";
 import { COLORS } from "@/lib/constants/color.constant";
-import { QUERY_CONSTANT } from "@/lib/constants/query.constant";
-import { homeApi } from "@/services/home.service";
-import { useSuspenseQuery } from "@tanstack/react-query";
+import type { ICategory } from "@/lib/interfaces/home/categories.interface";
 import { FlatList, Pressable, StyleSheet, View } from "react-native";
 
 interface ButtonProps {
@@ -12,33 +10,20 @@ interface ButtonProps {
   activeId: string | null;
 }
 
-interface Category {
-  id: string | null;
-  name: string;
-}
-
 interface Props {
   activeId: string | null;
   onPress: (id: string | null) => void;
+  categories: Pick<ICategory, "id" | "name">[];
 }
 
-export const Categories = ({ onPress, activeId }: Props) => {
-  const {
-    data: {
-      data: { data: categories },
-    },
-  } = useSuspenseQuery({
-    queryFn: () => homeApi.getCategories(),
-    queryKey: [QUERY_CONSTANT.CATEGORY, QUERY_CONSTANT.LIST],
-  });
-
-  const allCategories: Category[] = [
+export const Categories = ({ onPress, activeId, categories }: Props) => {
+  const allCategories: { id: string | null; name: string }[] = [
     { id: null, name: "All Coffee" },
     ...categories,
   ];
 
   return (
-    <View style={{ marginBottom: 18 }}>
+    <View style={{ marginVertical: 18 }}>
       <FlatList
         data={allCategories}
         horizontal

@@ -5,12 +5,12 @@ import { GetFilterUrl } from "@/lib/helper/function.helper";
 import { IAddressForm } from "@/lib/interfaces/address/address-form.interface";
 import { IAddressRes } from "@/lib/interfaces/address/address-res.interface";
 import { ICoffessRes } from "@/lib/interfaces/coffes.interface";
-import { ICategoryRes } from "@/lib/interfaces/home/categories.interface";
+import { IHomeRes } from "@/lib/interfaces/home/home-res.interface";
 
 export const homeApi = {
-  getCategories() {
-    return request<IApiResponse<ICategoryRes>>({
-      url: `${API_ENDPOINT.PRODUCT}/category?limit=100`,
+  getHome() {
+    return request<IApiResponse<IHomeRes>>({
+      url: `${API_ENDPOINT.USER}/home`,
       method: "GET",
     });
   },

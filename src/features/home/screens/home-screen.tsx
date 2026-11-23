@@ -1,5 +1,9 @@
+import { AppText } from "@/components/common/text/app-text";
+import { useApiMutation } from "@/hooks/use-api-mutation";
 import { COLORS } from "@/lib/constants/color.constant";
+import { getBestOfferForProduct } from "@/lib/helper/offer.helper";
 import { homeApi } from "@/services/home.service";
+import { orderApi } from "@/services/order.service";
 import {
   useInfiniteQuery,
   useQuery,
@@ -12,8 +16,6 @@ import { Categories } from "../components/categories";
 import { HomeHeader } from "../components/home-header";
 import { OfferBanner } from "../components/offer-banner";
 import { ProductCard } from "../components/product-card";
-import { useApiMutation } from "@/hooks/use-api-mutation";
-import { orderApi } from "@/services/order.service";
 
 export const HomeScreen = () => {
   const router = useRouter();
@@ -21,6 +23,10 @@ export const HomeScreen = () => {
   const cartQuery = useQuery({
     queryKey: ["cart"],
     queryFn: orderApi.getMyCart,
+  });
+  const homeQuery = useQuery({
+    queryKey: ["home"],
+    queryFn: homeApi.getHome,
   });
   const [pendingCartChanges, setPendingCartChanges] = useState<
     Record<string, number>
@@ -48,6 +54,7 @@ export const HomeScreen = () => {
     () => data?.pages.flatMap((page) => page.data.data),
     [data?.pages],
   );
+  const offers = homeQuery.data?.data.offers ?? [];
   const refreshCart = () =>
     queryClient.invalidateQueries({ queryKey: ["cart"] });
   const markCartChange = useCallback((coffeeId: string, pending: boolean) => {
@@ -62,17 +69,13 @@ export const HomeScreen = () => {
       return next;
     });
   }, []);
-  const { mutate: addToCart } = useApiMutation(
-    orderApi.addToCart,
-    {
-      onMutate: ({ coffeeId }) => markCartChange(coffeeId, true),
-      onSuccess: refreshCart,
-      onSettled: (_data, _error, { coffeeId }) =>
-        markCartChange(coffeeId, false),
-      onError: (error) =>
-        Alert.alert("Couldn't add coffee to cart", error.message),
-    },
-  );
+  const { mutate: addToCart } = useApiMutation(orderApi.addToCart, {
+    onMutate: ({ coffeeId }) => markCartChange(coffeeId, true),
+    onSuccess: refreshCart,
+    onSettled: (_data, _error, { coffeeId }) => markCartChange(coffeeId, false),
+    onError: (error) =>
+      Alert.alert("Couldn't add coffee to cart", error.message),
+  });
   const { mutate: updateQuantity } = useApiMutation(
     ({
       cartItemId,
@@ -89,8 +92,7 @@ export const HomeScreen = () => {
       onSuccess: refreshCart,
       onSettled: (_data, _error, { coffeeId }) =>
         markCartChange(coffeeId, false),
-      onError: (error) =>
-        Alert.alert("Couldn't update cart", error.message),
+      onError: (error) => Alert.alert("Couldn't update cart", error.message),
     },
   );
   const { mutate: removeFromCart } = useApiMutation(
@@ -101,8 +103,7 @@ export const HomeScreen = () => {
       onSuccess: refreshCart,
       onSettled: (_data, _error, { coffeeId }) =>
         markCartChange(coffeeId, false),
-      onError: (error) =>
-        Alert.alert("Couldn't remove item", error.message),
+      onError: (error) => Alert.alert("Couldn't remove item", error.message),
     },
   );
 
@@ -139,10 +140,18 @@ export const HomeScreen = () => {
         <>
           <HomeHeader />
           <View style={{ paddingHorizontal: 18, gap: 12 }}>
-            <OfferBanner />
+            {homeQuery.isError ? (
+              <AppText style={{ marginVertical: 18 }}>
+                Couldn't load today's offers and categories. Please try again
+                later.
+              </AppText>
+            ) : (
+              <OfferBanner offers={homeQuery.data?.data.offers ?? []} />
+            )}
             <Categories
               activeId={selectedCategoryId}
               onPress={(id) => setSelectedCategoryId(id)}
+              categories={homeQuery.data?.data.categories ?? []}
             />
           </View>
         </>
@@ -159,6 +168,7 @@ export const HomeScreen = () => {
         return (
           <ProductCard
             {...item}
+            offer={getBestOfferForProduct(item.id, item.categoryId, offers)}
             cartQuantity={cartItem?.quantity ?? 0}
             isCartUpdating={
               cartQuery.isLoading || Boolean(pendingCartChanges[item.id])
@@ -199,15 +209,3 @@ export const HomeScreen = () => {
     />
   );
 };
-
-// <View style={{ flex: 1 }}>
-//   <HomeHeader />
-
-//   <View style={{ paddingHorizontal: 24 }}>
-//     <OfferBanner />
-//     <Categories
-//       activeId={selectedCategoryId}
-//       onPress={(id) => setSelectedCategoryId(id)}
-//     />
-//   </View>
-// </View>

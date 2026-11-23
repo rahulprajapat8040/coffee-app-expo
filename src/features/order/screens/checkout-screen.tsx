@@ -1,5 +1,9 @@
 import { AppImage } from "@/components/common/media/app-image";
 import { AppText } from "@/components/common/text/app-text";
+import {
+  getBestOfferForProduct,
+  getOfferDiscountCents,
+} from "@/lib/helper/offer.helper";
 import { ScreenHeader } from "@/components/common/navigation/screen-header";
 import { COLORS } from "@/lib/constants/color.constant";
 import { FONTS } from "@/lib/constants/font.constant";
@@ -38,8 +42,13 @@ export const CheckoutScreen = () => {
     queryKey: ["address", "list", "checkout"],
     queryFn: () => homeApi.getAddress({ page: 1 }),
   });
+  const homeQuery = useQuery({
+    queryKey: ["home"],
+    queryFn: homeApi.getHome,
+  });
   const cart = cartQuery.data?.data ?? [];
   const addresses = addressQuery.data?.data.data ?? [];
+  const offers = homeQuery.data?.data.offers ?? [];
   const selectedAddress = addresses.find(
     (address) => address.id === selectedAddressId,
   );
@@ -54,7 +63,25 @@ export const CheckoutScreen = () => {
       ),
     [cart],
   );
-  const total = subtotal + DELIVERY_FEE + SERVICE_FEE;
+  const discountTotalCents = useMemo(
+    () =>
+      cart.reduce((sum, item) => {
+        const offer = getBestOfferForProduct(
+          item.coffeeId,
+          item.coffee.categoryId,
+          offers,
+        );
+        const unitPriceCents = Math.round(Number(item.variant.price) * 100);
+        const discountCents = getOfferDiscountCents(
+          unitPriceCents,
+          offer?.discountPercentage,
+        );
+        return sum + discountCents * item.quantity;
+      }, 0),
+    [cart, offers],
+  );
+  const discountTotal = discountTotalCents / 100;
+  const total = subtotal - discountTotal + DELIVERY_FEE + SERVICE_FEE;
 
   useEffect(() => {
     if (!selectedAddressId && addresses.length) {
@@ -79,31 +106,57 @@ export const CheckoutScreen = () => {
     },
   );
 
-  const renderItem = (item: ICartRes) => (
-    <View key={item.id} style={styles.orderItem}>
-      {item.coffee.image ? (
-        <AppImage src={item.coffee.image} style={styles.itemImage} />
-      ) : (
-        <View style={[styles.itemImage, styles.imagePlaceholder]}>
-          <Ionicons name="cafe-outline" size={22} color={COLORS.BRWON.NORMAL} />
+  const renderItem = (item: ICartRes) => {
+    const offer = getBestOfferForProduct(
+      item.coffeeId,
+      item.coffee.categoryId,
+      offers,
+    );
+    const originalPriceCents = Math.round(Number(item.variant.price) * 100);
+    const discountCents = getOfferDiscountCents(
+      originalPriceCents,
+      offer?.discountPercentage,
+    );
+    return (
+      <View key={item.id} style={styles.orderItem}>
+        {item.coffee.image ? (
+          <AppImage src={item.coffee.image} style={styles.itemImage} />
+        ) : (
+          <View style={[styles.itemImage, styles.imagePlaceholder]}>
+            <Ionicons name="cafe-outline" size={22} color={COLORS.BRWON.NORMAL} />
+          </View>
+        )}
+        <View style={styles.itemDescription}>
+          <AppText weight={FONTS.semibold} numberOfLines={1}>
+            {item.coffee.name}
+          </AppText>
+          <AppText style={styles.mutedText}>
+            {item.variant.size} · Qty {item.quantity}
+          </AppText>
         </View>
-      )}
-      <View style={styles.itemDescription}>
-        <AppText weight={FONTS.semibold} numberOfLines={1}>
-          {item.coffee.name}
-        </AppText>
-        <AppText style={styles.mutedText}>
-          {item.variant.size} · Qty {item.quantity}
-        </AppText>
+        <View style={{ alignItems: "flex-end" }}>
+          {discountCents > 0 ? (
+            <AppText style={styles.strikethroughPrice}>
+              {money((originalPriceCents * item.quantity) / 100)}
+            </AppText>
+          ) : null}
+          <AppText weight={FONTS.semibold} color={COLORS.BRWON.DARK}>
+            {money(
+              ((originalPriceCents - discountCents) * item.quantity) / 100,
+            )}
+          </AppText>
+        </View>
       </View>
-      <AppText weight={FONTS.semibold} color={COLORS.BRWON.DARK}>
-        {money(Number(item.variant.price) * item.quantity)}
-      </AppText>
-    </View>
-  );
+    );
+  };
 
   const canPlaceOrder =
-    cart.length > 0 && !!selectedAddressId && !unavailable && !isPending;
+    cart.length > 0 &&
+    !!selectedAddressId &&
+    !unavailable &&
+    !homeQuery.isLoading &&
+    !homeQuery.isError &&
+    !isPending;
 
   return (
     <SafeAreaView style={styles.screen} edges={["top", "bottom"]}>
@@ -270,7 +323,22 @@ export const CheckoutScreen = () => {
               >
                 Payment summary
               </AppText>
+              {homeQuery.isLoading ? (
+                <AppText
+                  size={12}
+                  color={COLORS.GREY.LIGHT_HOVER}
+                  style={{ marginBottom: 12 }}
+                >
+                  Checking available offers...
+                </AppText>
+              ) : null}
               <SummaryLine label="Order subtotal" value={money(subtotal)} />
+              {discountTotal > 0 && (
+                <SummaryLine
+                  label="Offer discount"
+                  value={`−${money(discountTotal)}`}
+                />
+              )}
               <SummaryLine label="Delivery fee" value={money(DELIVERY_FEE)} />
               <SummaryLine label="Service fee" value={money(SERVICE_FEE)} />
               <View style={styles.summaryDivider} />
@@ -286,6 +354,23 @@ export const CheckoutScreen = () => {
                 <AppText style={styles.warningText}>
                   An item is unavailable. Remove it from your cart to continue.
                 </AppText>
+              </View>
+            )}
+            {homeQuery.isError && (
+              <View style={styles.unavailableNotice}>
+                <Ionicons
+                  name="alert-circle-outline"
+                  size={17}
+                  color="#A44D2A"
+                />
+                <AppText style={styles.warningText}>
+                  Couldn't verify current offers. Retry before placing your order.
+                </AppText>
+                <Pressable onPress={() => homeQuery.refetch()}>
+                  <AppText color={COLORS.BRWON.DARK} weight={FONTS.semibold}>
+                    Retry
+                  </AppText>
+                </Pressable>
               </View>
             )}
           </ScrollView>
@@ -496,6 +581,11 @@ const styles = StyleSheet.create({
     backgroundColor: "#FFF1E9",
   },
   warningText: { flex: 1, color: "#8B4426", fontSize: 12 },
+  strikethroughPrice: {
+    color: COLORS.GREY.LIGHT_HOVER,
+    fontSize: 11,
+    textDecorationLine: "line-through",
+  },
   footer: {
     paddingHorizontal: 18,
     paddingTop: 12,

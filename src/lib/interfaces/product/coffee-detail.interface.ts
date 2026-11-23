@@ -2,6 +2,7 @@ import { VariantStatus } from "@/lib/enum";
 
 export interface ICoffeeData {
   id: string;
+  categoryId: string;
   image: string;
   name: string;
   description: string;

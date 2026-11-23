@@ -3,6 +3,8 @@ import { AppText } from "@/components/common/text/app-text";
 import { COLORS } from "@/lib/constants/color.constant";
 import { FONT_SIZES, FONTS } from "@/lib/constants/font.constant";
 import { ICoffee } from "@/lib/interfaces/coffes.interface";
+import type { IOffer } from "@/lib/interfaces/home/home-res.interface";
+import { getOfferDiscountCents } from "@/lib/helper/offer.helper";
 import { Ionicons } from "@expo/vector-icons";
 import { Pressable, StyleSheet, View } from "react-native";
 
@@ -12,6 +14,7 @@ interface ProductProp extends ICoffee {
   onDecreaseQuantity?: () => void;
   cartQuantity?: number;
   isCartUpdating?: boolean;
+  offer?: IOffer | null;
 }
 
 export const ProductCard = ({
@@ -24,13 +27,28 @@ export const ProductCard = ({
   onDecreaseQuantity,
   cartQuantity = 0,
   isCartUpdating = false,
+  offer,
 }: ProductProp) => {
   const availableVariant = variants.find(
     (variant) => variant.status === "AVAILABLE",
   );
+  const originalPriceCents = availableVariant
+    ? Math.round(Number(availableVariant.price) * 100)
+    : 0;
+  const discountCents = getOfferDiscountCents(
+    originalPriceCents,
+    offer?.discountPercentage,
+  );
   return (
     <Pressable onPress={onPress} style={styles.card}>
       <AppImage style={styles.productImage} src={image} />
+      {offer && discountCents > 0 ? (
+        <View style={styles.offerBadge}>
+          <AppText style={styles.offerBadgeText}>
+            {Number(offer.discountPercentage)}% OFF
+          </AppText>
+        </View>
+      ) : null}
       <View style={{ marginTop: 6 }}>
         <AppText
           size={FONT_SIZES.base}
@@ -51,14 +69,21 @@ export const ProductCard = ({
             gap: 8,
           }}
         >
-          <AppText
-            numberOfLines={1}
-            style={{ flex: 1, fontWeight: "bold", fontSize: FONT_SIZES.md }}
-          >
-            {availableVariant
-              ? `$ ${Number(availableVariant.price).toFixed(2)}`
-              : "Unavailable"}
-          </AppText>
+          <View style={styles.priceBlock}>
+            <AppText
+              numberOfLines={1}
+              style={styles.price}
+            >
+              {availableVariant
+                ? `$ ${((originalPriceCents - discountCents) / 100).toFixed(2)}`
+                : "Unavailable"}
+            </AppText>
+            {discountCents > 0 ? (
+              <AppText style={styles.originalPrice}>
+                `$ ${Number(availableVariant?.price).toFixed(2)}`
+              </AppText>
+            ) : null}
+          </View>
           {cartQuantity > 0 ? (
             <View style={styles.quantityControl}>
               <Pressable
@@ -128,12 +153,42 @@ const styles = StyleSheet.create({
     marginBottom: 12,
     flex: 1,
     maxWidth: "50%",
+    position: "relative",
   },
 
   productImage: {
     width: "100%",
     height: 150,
     borderRadius: 12,
+  },
+  offerBadge: {
+    position: "absolute",
+    top: 14,
+    left: 14,
+    zIndex: 1,
+    paddingHorizontal: 9,
+    paddingVertical: 5,
+    borderRadius: 12,
+    backgroundColor: "#E65046",
+  },
+  offerBadgeText: {
+    color: "#FFFFFF",
+    fontSize: 9,
+    fontWeight: "700",
+  },
+  priceBlock: {
+    flex: 1,
+    justifyContent: "center",
+  },
+  price: {
+    fontWeight: "bold",
+    fontSize: FONT_SIZES.md,
+    color: COLORS.BRWON.DARK,
+  },
+  originalPrice: {
+    color: COLORS.GREY.LIGHT_HOVER,
+    fontSize: 10,
+    textDecorationLine: "line-through",
   },
   addButton: {
     width: 36,

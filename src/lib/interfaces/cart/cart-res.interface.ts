@@ -8,6 +8,7 @@ export interface ICartRes {
   updatedAt: string;
   coffee: {
     id: string;
+    categoryId: string;
     name: string;
     image: string | null;
     isActive: boolean;

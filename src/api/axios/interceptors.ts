@@ -1,14 +1,13 @@
-import { logger } from "@/lib/helper/logger.helper";
 import { tokenStorage } from "@/lib/storage/token-storage";
 import { AxiosError } from "axios";
 import { axiosInstance } from "./axios";
 import { ApiError } from "./errors";
 import { refreshSession } from "./refresh";
+import type { CustomAxiosRequestConfig } from "./types";
 
 axiosInstance.interceptors.request.use(
   async (config) => {
     const token = await tokenStorage.getAccessToken();
-    logger.log("token isss", token);
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -21,25 +20,24 @@ axiosInstance.interceptors.response.use(
   (response) => response,
 
   async (error: AxiosError) => {
-    const config = error.config as any;
+    const config = error.config as CustomAxiosRequestConfig | undefined;
 
-    const response = error.response?.data as {
-      error?: string;
-      message?: string;
-    };
+    const response =
+      typeof error.response?.data === "object" && error.response.data !== null
+        ? (error.response.data as { error?: string; message?: string })
+        : {};
     const shouldRefresh =
       error.response?.status === 401 &&
       (response.error === "TOKEN_EXPIRED" ||
         response.error === "TOKEN_NOT_PROVIDED") &&
       config &&
       !config._retry &&
-      !config.skipAuthRefresh;
-    console.log("interseee", response.error);
+      !config.skipAuthRefresh &&
+      !config.url?.includes("/auth/refresh-token");
     if (shouldRefresh) {
       config._retry = true;
 
       try {
-        console.log("session refresh");
         await refreshSession();
 
         return axiosInstance(config);
